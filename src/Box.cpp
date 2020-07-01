@@ -10,6 +10,6 @@ Box::Box(int dim, int val) {
     choices.insert(val);
 }
 
-Box::getValue() {
+int Box::getValue() {
     return value;
 }

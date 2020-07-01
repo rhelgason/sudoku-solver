@@ -18,6 +18,12 @@ class Grid {
 
         // returns a string version of the Grid for output
         string toString();
+
+        // recursive function for solving board
+        void solve(int row, int col);
+
+        // destructor for Grid class
+        ~Grid();
 };
 
 #endif

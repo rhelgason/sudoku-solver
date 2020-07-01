@@ -21,11 +21,25 @@ string Grid::toString() {
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
             out += to_string(board[i][j]->getValue());
-            if (j != dim) out += " ";
+            if (j != dim - 1) out += " ";
             if ((j + 1) % 3 == 0 && j + 1 != dim) out += " ";
         }
-        if (i != dim) out += "\n";
+        if (i != dim - 1) out += "\n";
         if ((i + 1) % 3 == 0 && i + 1 != dim) out += "\n";
     }
     return out;
+}
+
+void Grid::solve(int row, int col) {
+
+}
+
+Grid::~Grid() {
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < dim; j++) {
+            delete board[i][j];
+        }
+        delete[] board[i];
+    }
+    delete[] board;
 }

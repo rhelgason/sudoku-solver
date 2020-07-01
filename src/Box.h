@@ -19,7 +19,7 @@ class Box {
         Box(int dim, int val);
 
         // get the value of the Box
-        getValue();
+        int getValue();
 };
 
 #endif

@@ -23,14 +23,22 @@ int main(int argc, char* argv[]) {
 
             // read integer for a single box
             while ((k + len) < currLine.length() && isdigit(currLine[k + len])) len++;
-            if ((k + len) != currLine.length() && currLine[k + len] != ',') throw new runtime_error("Error: the board contained invalid input.");
+            if ((k + len) != currLine.length() && currLine[k + len] != ',') {
+                cout << "Error: the board contained invalid input." << endl;
+                return 1;
+            }
             if (len == 0) {
                 inBoard[i][j] = 0;
             } else {
                 try {
-                    inBoard[i][j] = stoi(currLine.substr(k, len));
+                    int temp = stoi(currLine.substr(k, len));
+                    if (temp > dim || temp <= 0) {
+                        cout << "Error: inputs must be between 1 and " << dim << ", inclusive." << endl;
+                        return 1;
+                    }
+                    inBoard[i][j] = temp;
                 } catch (out_of_range const &e) {
-                    cout << "Error: some input was out of range.";
+                    cout << "Error: some input was out of range." << endl;
                     return 1;
                 }
             }
@@ -38,4 +46,10 @@ int main(int argc, char* argv[]) {
         }
     }
     Grid* grid = new Grid(dim, inBoard);
+
+    // solve the board
+    cout << "\nSolving this board:\n\n" << grid->toString() << "\n\nWorking...";
+    //grid->solve(0, 0);
+    delete grid;
+    grid = NULL;
 }
