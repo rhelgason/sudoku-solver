@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
             if (len == 0) {
                 inBoard[i][j] = 0;
             } else {
+                // error checking for integer conversion
                 try {
                     int temp = stoi(currLine.substr(k, len));
                     if (temp > dim || temp <= 0) {
@@ -45,10 +46,17 @@ int main(int argc, char* argv[]) {
             k += len + 1;
         }
     }
+
+    // initialize game board
     Grid* grid = new Grid(dim, inBoard);
+    for (int i = 0; i < dim; i++) {
+        delete[] inBoard[i];
+    }
+    delete[] inBoard;
+    inBoard = NULL;
 
     // solve the board
-    cout << "\nSolving this board:\n\n" << grid->toString() << "\n\nWorking...";
+    cout << "\nSolving this board:\n\n" << grid->toString() << "\n\nWorking...\n";
     //grid->solve(0, 0);
     delete grid;
     grid = NULL;
