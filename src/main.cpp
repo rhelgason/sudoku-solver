@@ -10,45 +10,38 @@ int main(int argc, char* argv[]) {
     const int dim = 9;
     int** inBoard = new int*[dim];
     for (int i = 0; i < dim; i++) inBoard[i] = new int[dim];
-    string currLine;
+    string curr;
     ifstream inFile(argv[1]);
-    if (!inFile.is_open()) throw runtime_error("Error: could not open file.");
+    if (!inFile.is_open()) throw runtime_error("\nError: could not open file.\n");
 
     // read the board contents
     for (int i = 0; i < dim; i++) {
-        getline(inFile, currLine);
-        unsigned int k = 0;
         for (int j = 0; j < dim; j++) {
-            unsigned int len = 0;
-
-            // read integer for a single box
-            while ((k + len) < currLine.length() && isdigit(currLine[k + len])) len++;
-            if ((k + len) != currLine.length() && currLine[k + len] != ',') {
-                cout << "Error: the board contained invalid input." << endl;
+            try {
+                // error checking for single input
+                if (inFile.peek() == EOF) throw invalid_argument("");
+                inFile >> curr;
+                int temp = stoi(curr);
+                if (temp > dim || temp < 0) throw out_of_range("");
+                inBoard[i][j] = temp;
+            } catch (invalid_argument const &e) {
+                cout << "\nError: some input in the board was invalid.\n";
+                return 1;
+            } catch (out_of_range const &e) {
+                cout << "\nError: inputs must be between 1 and " << dim << ", inclusive.\n";
                 return 1;
             }
-            if (len == 0) {
-                inBoard[i][j] = 0;
-            } else {
-                // error checking for integer conversion
-                try {
-                    int temp = stoi(currLine.substr(k, len));
-                    if (temp > dim || temp <= 0) {
-                        cout << "Error: inputs must be between 1 and " << dim << ", inclusive." << endl;
-                        return 1;
-                    }
-                    inBoard[i][j] = temp;
-                } catch (out_of_range const &e) {
-                    cout << "Error: some input was out of range." << endl;
-                    return 1;
-                }
-            }
-            k += len + 1;
         }
     }
 
     // initialize game board
-    Grid* grid = new Grid(dim, inBoard);
+    Grid* grid;
+    try {
+        grid = new Grid(dim, inBoard);
+    } catch (exception const &e) {
+        cout << "\nError: the input board is not valid.\n";
+        return 1;
+    }
     for (int i = 0; i < dim; i++) {
         delete[] inBoard[i];
     }
@@ -56,8 +49,12 @@ int main(int argc, char* argv[]) {
     inBoard = NULL;
 
     // solve the board
-    cout << "\nSolving this board:\n\n" << grid->toString() << "\n\nWorking...\n";
-    //grid->solve(0, 0);
+    cout << "\nSolving this board:\n\n" << grid->toString() << "\n\nWorking..." << endl;
+    if (grid->solve(0, 0)) {
+        cout << "Board has been solved:\n\n" << grid->toString() << "\n";
+    } else {
+        cout << "The board could not be solved.\n";
+    }
     delete grid;
     grid = NULL;
 }

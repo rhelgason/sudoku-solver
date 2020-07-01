@@ -13,3 +13,11 @@ Box::Box(int dim, int val) {
 int Box::getValue() {
     return value;
 }
+
+void Box::setValue(int val) {
+    value = val;
+}
+
+unordered_set<int> Box::getChoices() {
+    return choices;
+}

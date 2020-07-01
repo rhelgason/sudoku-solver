@@ -20,6 +20,12 @@ class Box {
 
         // get the value of the Box
         int getValue();
+
+        // set the value of the Box
+        void setValue(int val);
+
+        // get all possible choices for the Box
+        unordered_set<int> getChoices();
 };
 
 #endif
