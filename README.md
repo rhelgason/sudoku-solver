@@ -7,6 +7,10 @@ Sudoku is a classic logic puzzle in which the player is provided a 9x9 grid subd
 ## Usage
 The program must be provided with a `board.txt` file to correctly operate. This file should contain the unsolved Sudoku board for the program to complete. Each square should contain a digit, separated from surrounding squares with whitespace. Any squares that do not have any starting digits should contain a 0 for preprocessing. Any example of an unsolved Sudoku board is below:
 
+<p align="center">
+  <img src="https://github.com/rhelgason/sudoku-solver/blob/master/img/board-example.PNG" alt="example board"/>
+<p>
+
 It is not necessary that subgrids are divided with extra space as shown above, but it is helpful to view the board this way. Within the example-boards/ directory, five unsolved boards have been provided for testing purposes. A blank board has also been provided for ease of creating your own unsolved board. To use any board with the program, simply move the desired file to the top directory and rename it to `board.txt`.
 
 A Makefile has been included in the top directory. To use the Makefile, the make utility must be available. The program can be compiled and ran using any of the commands detailed below under "How the Algorithms Work". This will create and run executable files for use by the C++ runtime. To remove all of the executable files created during compilation, run the `make clean` command. If the make utility is not available, all executable files can be cleaned using `rm -f *.exe`.
