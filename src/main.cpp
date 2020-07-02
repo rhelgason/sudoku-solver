@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <cctype>
+#include <chrono>
 #include "Grid.h"
 #include "Box.h"
 
@@ -49,9 +49,12 @@ int main(int argc, char* argv[]) {
     inBoard = NULL;
 
     // solve the board
+    chrono::steady_clock::time_point begin = chrono::steady_clock::now();
     cout << "\nSolving this board:\n\n" << grid->toString() << "\n\nWorking..." << endl;
     if (grid->solve(0, 0)) {
-        cout << "Board has been solved:\n\n" << grid->toString() << "\n";
+        chrono::steady_clock::time_point end = chrono::steady_clock::now();
+        cout << "Board has been solved in " << (chrono::duration_cast<chrono::milliseconds>(end - begin).count() / 1000.0);
+        cout << " seconds:\n\n" << grid->toString() << "\n";
     } else {
         cout << "The board could not be solved.\n";
     }

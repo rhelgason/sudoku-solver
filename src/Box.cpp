@@ -18,6 +18,6 @@ void Box::setValue(int val) {
     value = val;
 }
 
-unordered_set<int> Box::getChoices() {
+set<int> Box::getChoices() {
     return choices;
 }

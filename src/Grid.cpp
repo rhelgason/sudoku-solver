@@ -3,11 +3,11 @@
 Grid::Grid(int dim, int** inBoard) {
     // initialize tracking sets
     this->dim = dim;
-    rows = new unordered_set<int>[dim];
-    cols = new unordered_set<int>[dim];
-    divs = new unordered_set<int>*[dim / 3];
+    rows = new set<int>[dim];
+    cols = new set<int>[dim];
+    divs = new set<int>*[dim / 3];
     for (int i = 0; i < dim / 3; i++) {
-        divs[i] = new unordered_set<int>[dim / 3];
+        divs[i] = new set<int>[dim / 3];
     }
 
     // initialize game board
@@ -86,7 +86,7 @@ bool Grid::solve(int row, int col) {
     if (row == dim) return true;
 
     // try all possibilities
-    unordered_set<int> choices = board[row][col]->getChoices();
+    set<int> choices = board[row][col]->getChoices();
     while (choices.size() > 0) {
         int curr = *choices.begin();
         choices.erase(choices.begin());

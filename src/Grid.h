@@ -2,9 +2,7 @@
 #define GRID_H
 
 #include <iostream>
-#include <unordered_set>
-#include <algorithm>
-#include <iterator>
+#include <set>
 #include "Box.h"
 using namespace std;
 
@@ -13,9 +11,9 @@ class Grid {
     private:
         int dim;
         Box*** board;
-        unordered_set<int>* rows;
-        unordered_set<int>* cols;
-        unordered_set<int>** divs;
+        set<int>* rows;
+        set<int>* cols;
+        set<int>** divs;
 
     public:
         // basic constructor for the Grid

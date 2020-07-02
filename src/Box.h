@@ -2,14 +2,14 @@
 #define BOX_H
 
 #include <iostream>
-#include <unordered_set>
+#include <set>
 using namespace std;
 
 // class representing a single square of the Sudoku puzzle.
 class Box {
     private:
         int value;
-        unordered_set<int> choices;
+        set<int> choices;
     
     public:
         // basic constructor for initializing an unknown Box.
@@ -25,7 +25,7 @@ class Box {
         void setValue(int val);
 
         // get all possible choices for the Box
-        unordered_set<int> getChoices();
+        set<int> getChoices();
 };
 
 #endif
