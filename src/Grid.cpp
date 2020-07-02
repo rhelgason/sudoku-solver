@@ -3,11 +3,25 @@
 Grid::Grid(int dim, int** inBoard) {
     // initialize tracking sets
     this->dim = dim;
-    rows = new set<int>[dim];
-    cols = new set<int>[dim];
-    divs = new set<int>*[dim / 3];
+    rows = new bool*[dim];
+    cols = new bool*[dim];
+    divs = new bool**[dim / 3];
+    for (int i = 0; i < dim; i++) {
+        rows[i] = new bool[dim];
+        cols[i] = new bool[dim];
+        for (int j = 0; j < dim; j++) {
+            rows[i][j] = false;
+            cols[i][j] = false;
+        }
+    }
     for (int i = 0; i < dim / 3; i++) {
-        divs[i] = new set<int>[dim / 3];
+        divs[i] = new bool*[dim / 3];
+        for (int j = 0; j < dim / 3; j++) {
+            divs[i][j] = new bool[dim];
+            for (int k = 0; k < dim; k++) {
+                divs[i][j][k] = false;
+            }
+        }
     }
 
     // initialize game board
@@ -31,11 +45,15 @@ Grid::Grid(int dim, int** inBoard) {
 
     // empty tracking sets
     for (int i = 0; i < dim; i++) {
-        rows[i].clear();
-        cols[i].clear();
-        if (i < dim / 3) {
-            for (int j = 0; j < dim / 3; j++) {
-                divs[i][j].clear();
+        for (int j = 0; j < dim; j++) {
+            rows[i][j] = false;
+            cols[i][j] = false;
+        }
+    }
+    for (int i = 0; i < dim / 3; i++) {
+        for (int j = 0; j < dim / 3; j++) {
+            for (int k = 0; k < dim; k++) {
+                divs[i][j][k] = false;
             }
         }
     }
@@ -43,22 +61,22 @@ Grid::Grid(int dim, int** inBoard) {
 
 bool Grid::valid(int row, int col, int num) {
     // check if already used
-    if (rows[row].find(num) != rows[row].end()) return false;
-    if (cols[col].find(num) != cols[col].end()) return false;
-    if (divs[row / 3][col / 3].find(num) != divs[row / 3][col / 3].end()) return false;
+    if (rows[row][num - 1]) return false;
+    if (cols[col][num - 1]) return false;
+    if (divs[row / 3][col / 3][num - 1]) return false;
     return true;
 }
 
 void Grid::track(int row, int col, int num) {
-    rows[row].insert(num);
-    cols[col].insert(num);
-    divs[row / 3][col / 3].insert(num);
+    rows[row][num - 1] = true;
+    cols[col][num - 1] = true;
+    divs[row / 3][col / 3][num - 1] = true;
 }
 
 void Grid::untrack(int row, int col, int num) {
-    rows[row].erase(num);
-    cols[col].erase(num);
-    divs[row / 3][col / 3].erase(num);
+    rows[row][num - 1] = false;
+    cols[col][num - 1] = false;
+    divs[row / 3][col / 3][num - 1] = false;
 }
 
 string Grid::toString() {
@@ -107,9 +125,16 @@ bool Grid::solve(int row, int col) {
 
 Grid::~Grid() {
     // destruct tracking sets
+    for (int i = 0; i < dim; i++) {
+        delete[] rows[i];
+        delete[] cols[i];
+    }
     delete[] rows;
     delete[] cols;
     for (int i = 0; i < dim / 3; i++) {
+        for (int j = 0; j < dim / 3; j++) {
+            delete[] divs[i][j];
+        }
         delete[] divs[i];
     }
     delete[] divs;

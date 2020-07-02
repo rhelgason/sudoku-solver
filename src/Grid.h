@@ -11,9 +11,9 @@ class Grid {
     private:
         int dim;
         Box*** board;
-        set<int>* rows;
-        set<int>* cols;
-        set<int>** divs;
+        bool** rows;
+        bool** cols;
+        bool*** divs;
 
     public:
         // basic constructor for the Grid
