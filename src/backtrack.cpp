@@ -21,9 +21,14 @@ int main(int argc, char* argv[]) {
                 // error checking for single input
                 if (inFile.peek() == EOF) throw invalid_argument("");
                 inFile >> curr;
-                int temp = stoi(curr);
-                if (temp > dim || temp < 0) throw out_of_range("");
-                inBoard[i][j] = temp;
+                if (curr == ".") {
+                    inBoard[i][j] = 0;
+                }
+                else {
+                    int temp = stoi(curr);
+                    if (temp > dim || temp < 1) throw out_of_range("");
+                    inBoard[i][j] = temp;
+                }
             } catch (invalid_argument const &e) {
                 cout << "\nError: some input in the board was invalid.\n";
                 return 1;

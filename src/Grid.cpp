@@ -83,12 +83,20 @@ string Grid::toString() {
     string out = "";
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
-            out += to_string(board[i][j]->getValue());
+            int val = board[i][j]->getValue();
+            out += val == 0 ? "." : to_string(val);
             if (j != dim - 1) out += " ";
-            if ((j + 1) % 3 == 0 && j + 1 != dim) out += " ";
+            if ((j + 1) % 3 == 0 && j + 1 != dim) out += "| ";
         }
         if (i != dim - 1) out += "\n";
-        if ((i + 1) % 3 == 0 && i + 1 != dim) out += "\n";
+        if ((i + 1) % 3 == 0 && i + 1 != dim) {
+            for (int j = 0; j < dim; j++) {
+            out += "-";
+            if (j != dim - 1) out += "-";
+            if ((j + 1) % 3 == 0 && j + 1 != dim) out += "+-";
+            }
+            out += "\n";
+        }
     }
     return out;
 }
