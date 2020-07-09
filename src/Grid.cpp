@@ -1,8 +1,26 @@
 #include "Grid.h"
 
-Grid::Grid(int dim, int** inBoard) {
-    // initialize tracking sets
+Grid::Grid(int dim, ifstream& inFile, int** inBoard) {
+    // read the board contents
     this->dim = dim;
+    string curr;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < dim; j++) {
+            // error checking for single input
+            if (inFile.peek() == EOF) throw invalid_argument("");
+            inFile >> curr;
+            if (curr == ".") {
+                inBoard[i][j] = 0;
+            }
+            else {
+                int temp = stoi(curr);
+                if (temp > dim || temp < 1) throw out_of_range("");
+                inBoard[i][j] = temp;
+            }
+        }
+    }
+
+    // initialize tracking sets
     rows = new bool*[dim];
     cols = new bool*[dim];
     divs = new bool**[dim / 3];
@@ -79,6 +97,120 @@ void Grid::untrack(int row, int col, int num) {
     divs[row / 3][col / 3][num - 1] = false;
 }
 
+bool Grid::solveBacktrack(int row, int col) {
+    // increment row and column
+    if (col == dim) {
+        col = 0;
+        row++;
+    }
+
+    // base case
+    if (row == dim) return true;
+
+    // try all possibilities
+    set<int> choices = board[row][col]->getChoices();
+    while (choices.size() > 0) {
+        int curr = *choices.begin();
+        choices.erase(choices.begin());
+        if (valid(row, col, curr)) {
+            track(row, col, curr);
+            if (solveBacktrack(row, col + 1)) {
+                board[row][col]->setValue(curr);
+                return true;
+            } else {
+                untrack(row, col, curr);
+            }
+        }
+    }
+
+    // not possible to solve
+    return false;
+}
+
+void Grid::algorithmX(int** inBoard) {
+    // candidate arrays
+    valCand = new bool[dim * dim * dim];
+    cand = new int[dim * dim * 4];
+    for (int i = 0; i < (dim * dim * 4); i++) {
+        cand[i] = 0;
+    }
+
+    // initialize matrix
+    matrix = new bool*[dim * dim * dim];
+    for (int i = 0; i < (dim * dim * dim); i++) {
+        matrix[i] = new bool[dim * dim * 4];
+
+        // determine if box is known
+        int row = i / (dim * dim);
+        int col = (i % (dim * dim)) / dim;
+        int num = ((i % (dim * dim)) % dim) + 1;
+        if (inBoard[row][col] != 0 && inBoard[row][col] != num) {
+            valCand[i] = false;
+            matrixRow(i, row, col, -1);
+        } else {
+            valCand[i] = true;
+            matrixRow(i, row, col, num);
+        }
+    }
+}
+
+void Grid::matrixRow(int index, int row, int col, int num) {
+    // make all false
+    bool* arr = matrix[index];
+    for (int i = 0; i < (dim * dim * 4); i++) {
+        arr[i] = false;
+    }
+    if (num == -1) return;
+
+    // cell constraint
+    int i = (row * dim) + col;
+    arr[i] = true;
+    cand[i]++;
+
+    // row constraint
+    i = (dim * dim) + (row * dim) + (num - 1);
+    arr[i] = true;
+    cand[i]++;
+
+    // column constraint
+    i = (dim * dim * 2) + (col * dim) + (num - 1);
+    arr[i] = true;
+    cand[i]++;
+
+    // subgrid constraint
+    int box = (col / 3) + (row / 3) * 3;
+    i = (dim * dim * 3) + (box * dim) + (num - 1);
+    arr[i] = true;
+    cand[i]++;
+}
+
+bool Grid::solveAlgorithmX() {
+    return true;
+}
+
+/*
+void Grid::printMatrix() {
+    ofstream outFile;
+    outFile.open("matrix.txt");
+    for (int i = 0; i < (dim * dim * dim); i++) {
+        for (int j = 0; j < (dim * dim * 4); j++) {
+            if (matrix[i][j]) outFile << "1";
+            else outFile << " ";
+            if ((j + 1) % (dim * dim) == 0) outFile << "|";
+        }
+        outFile << endl;
+        if ((i + 1) % dim == 0) {
+            for (int j = 0; j < (dim * dim * 4); j++) {
+                outFile << "-";
+                if ((j + 1) % (dim * dim * 4) == 0) outFile << "+";
+            }
+            outFile << endl;
+        }
+    }
+    outFile.close();
+}
+*/
+
 string Grid::toString() {
     string out = "";
     for (int i = 0; i < dim; i++) {
@@ -99,36 +231,6 @@ string Grid::toString() {
         }
     }
     return out;
-}
-
-bool Grid::solve(int row, int col) {
-    // increment row and column
-    if (col == dim) {
-        col = 0;
-        row++;
-    }
-
-    // base case
-    if (row == dim) return true;
-
-    // try all possibilities
-    set<int> choices = board[row][col]->getChoices();
-    while (choices.size() > 0) {
-        int curr = *choices.begin();
-        choices.erase(choices.begin());
-        if (valid(row, col, curr)) {
-            track(row, col, curr);
-            if (solve(row, col + 1)) {
-                board[row][col]->setValue(curr);
-                return true;
-            } else {
-                untrack(row, col, curr);
-            }
-        }
-    }
-
-    // not possible to solve
-    return false;
 }
 
 Grid::~Grid() {
@@ -155,4 +257,16 @@ Grid::~Grid() {
         delete[] board[i];
     }
     delete[] board;
+}
+
+void Grid::destructAlgorithmX() {
+    // destruct candidate arrays
+    delete[] valCand;
+    delete[] cand;
+
+    // destruct matrix
+    for (int i = 0; i < (dim * dim * dim); i++) {
+        delete[] matrix[i];
+    }
+    delete[] matrix;
 }
