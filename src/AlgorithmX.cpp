@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
         cout << "Board has been solved in " << (chrono::duration_cast<chrono::milliseconds>(end - begin).count() / 1000.0);
         cout << " seconds:\n\n" << grid->toString() << "\n";
     } else {
-        cout << "The board could not be solved.\n";
+        cout << "\nThe board could not be solved.\n";
     }
     grid->destructAlgorithmX();
     delete grid;

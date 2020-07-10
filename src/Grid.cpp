@@ -129,9 +129,11 @@ bool Grid::solveBacktrack(int row, int col) {
 
 void Grid::algorithmX(int** inBoard) {
     // candidate arrays
-    valCand = new bool[dim * dim * dim];
+    validRow = new bool[dim * dim * dim];
+    validCol = new bool[dim * dim * 4];
     cand = new int[dim * dim * 4];
     for (int i = 0; i < (dim * dim * 4); i++) {
+        validCol[i] = true;
         cand[i] = 0;
     }
 
@@ -139,16 +141,15 @@ void Grid::algorithmX(int** inBoard) {
     matrix = new bool*[dim * dim * dim];
     for (int i = 0; i < (dim * dim * dim); i++) {
         matrix[i] = new bool[dim * dim * 4];
+        validRow[i] = true;
 
         // determine if box is known
         int row = i / (dim * dim);
         int col = (i % (dim * dim)) / dim;
         int num = ((i % (dim * dim)) % dim) + 1;
         if (inBoard[row][col] != 0 && inBoard[row][col] != num) {
-            valCand[i] = false;
             matrixRow(i, row, col, -1);
         } else {
-            valCand[i] = true;
             matrixRow(i, row, col, num);
         }
     }
@@ -162,54 +163,65 @@ void Grid::matrixRow(int index, int row, int col, int num) {
     }
     if (num == -1) return;
 
-    // cell constraint
-    int i = (row * dim) + col;
-    arr[i] = true;
-    cand[i]++;
-
-    // row constraint
-    i = (dim * dim) + (row * dim) + (num - 1);
-    arr[i] = true;
-    cand[i]++;
-
-    // column constraint
-    i = (dim * dim * 2) + (col * dim) + (num - 1);
-    arr[i] = true;
-    cand[i]++;
-
-    // subgrid constraint
+    // cell, row, column, and subgrid constraints
     int box = (col / 3) + (row / 3) * 3;
-    i = (dim * dim * 3) + (box * dim) + (num - 1);
-    arr[i] = true;
-    cand[i]++;
+    int pos[4] = { (row * dim) + col,
+                   (dim * dim) + (row * dim) + (num - 1),
+                   (dim * dim * 2) + (col * dim) + (num - 1),
+                   (dim * dim * 3) + (box * dim) + (num - 1) };
+    for (int i = 0; i < 4; i++) {
+        arr[pos[i]] = true;
+        cand[pos[i]]++;
+    }
 }
 
 bool Grid::solveAlgorithmX() {
-    return true;
-}
+    // deterministically select column
+    int low = -1;
+    for (int i = 0; i < (dim * dim * 4); i++) {
+        if (!validCol[i]) continue;
+        if (cand[i] < cand[low] || low == -1) low = i;
+    }
+    if (low == -1) return true;
 
-/*
-void Grid::printMatrix() {
-    ofstream outFile;
-    outFile.open("matrix.txt");
+    // nondeterministically try rows
+    vector<int> rows;
     for (int i = 0; i < (dim * dim * dim); i++) {
+        if (matrix[i][low] && validRow[i]) rows.push_back(i);
+    }
+    for (int r : rows) {
+        // eliminate rows for partial solution
+        vector<int> delCol;
+        vector<int> delRow;
         for (int j = 0; j < (dim * dim * 4); j++) {
-            if (matrix[i][j]) outFile << "1";
-            else outFile << " ";
-            if ((j + 1) % (dim * dim) == 0) outFile << "|";
-        }
-        outFile << endl;
-        if ((i + 1) % dim == 0) {
-            for (int j = 0; j < (dim * dim * 4); j++) {
-                outFile << "-";
-                if ((j + 1) % (dim * dim * 4) == 0) outFile << "+";
+            if (!matrix[r][j] || !validCol[j]) continue;
+            for (int i = 0; i < (dim * dim * dim); i++) {
+                if (!matrix[i][j] || !validRow[i]) continue;
+                validRow[i] = false;
+                delRow.push_back(i);
             }
-            outFile << endl;
+            validCol[j] = false;
+            delCol.push_back(j);
+        }
+
+        if (solveAlgorithmX()) {
+            // add valid solution to grid
+            int row = r / (dim * dim);
+            int col = (r % (dim * dim)) / dim;
+            int num = ((r % (dim * dim)) % dim) + 1;
+            board[row][col]->setValue(num);
+            return true;
+        } else {
+            // reset and continue search
+            for (int i : delRow) validRow[i] = true;
+            for (int j : delCol) validCol[j] = true;
+            validRow[r] = true;
         }
     }
-    outFile.close();
+
+    // no solution was found
+    return false;
 }
-*/
 
 string Grid::toString() {
     string out = "";
@@ -261,7 +273,7 @@ Grid::~Grid() {
 
 void Grid::destructAlgorithmX() {
     // destruct candidate arrays
-    delete[] valCand;
+    delete[] validRow;
     delete[] cand;
 
     // destruct matrix

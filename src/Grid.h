@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <set>
+#include <vector>
 #include "Box.h"
 using namespace std;
 
@@ -20,7 +21,8 @@ class Grid {
         // algorithm x data structures
         bool** matrix;
         int* cand;
-        bool* valCand;
+        bool* validRow;
+        bool* validCol;
 
     public:
         // basic constructor for the Grid
@@ -46,8 +48,6 @@ class Grid {
 
         // recursive function for solving with algorithm x
         bool solveAlgorithmX();
-
-        //void printMatrix();
 
         // returns a string version of the Grid for output
         string toString();
