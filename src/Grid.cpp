@@ -1,29 +1,59 @@
 #include "Grid.h"
 
-Grid::Grid(int dim, ifstream& inFile, int** inBoard) {
-    // read the board contents
-    this->dim = dim;
+Grid::Grid(ifstream& inFile, int**& inBoard, int& dim) {
     string curr;
+    try {
+        inFile >> curr;
+        dim = stoi(curr);
+        if (dim > 16) throw out_of_range("");
+        this->dim = dim;
+        inFile >> curr;
+        subHeight = stoi(curr);
+        inFile >> curr;
+        subWidth = stoi(curr);
+        inFile >> curr;
+        if (curr != "---") throw invalid_argument("");
+        if (dim < 1 || subHeight < 1 || subWidth < 1 || subHeight * subWidth != dim) throw out_of_range("");
+    } catch (invalid_argument const &e) {
+        throw invalid_argument("Error: there was a mistake in the dimension input.");
+    } catch (out_of_range const &e) {
+        throw invalid_argument("Error: the input dimensions are not valid.");
+    }
+
+    // read the board contents
+    inBoard = new int*[dim];
+    for (int i = 0; i < dim; i++) inBoard[i] = new int[dim];
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
             // error checking for single input
-            if (inFile.peek() == EOF) throw invalid_argument("");
-            inFile >> curr;
+            if (!(inFile >> curr)) throw invalid_argument("Error: the input board did not contain enough information.");
             if (curr == ".") {
-                inBoard[i][j] = 0;
+                inBoard[i][j] = -1;
             }
             else {
-                int temp = stoi(curr);
-                if (temp > dim || temp < 1) throw out_of_range("");
+                int temp;
+                try {
+                    temp = stoi(curr, 0, 16);
+                } catch (out_of_range const &e) {
+                    throw invalid_argument("Error: inputs must be between 1 and " + to_string(dim) + ", inclusive.");
+                } catch (invalid_argument const &e) {
+                    throw invalid_argument("Error: some input in the board was invalid.");
+                }
+                if (dim == 16) {
+                    if (temp > dim || temp < 0) throw invalid_argument("Error: inputs must be between 0 and " + to_string(dim) + ", inclusive.");
+                } else {
+                    if (temp > dim || temp < 1) throw invalid_argument("Error: inputs must be between 1 and " + to_string(dim) + ", inclusive.");
+                }
                 inBoard[i][j] = temp;
             }
         }
     }
+    if (inFile >> curr) throw invalid_argument("Error: the input file contained too much information.");
 
     // initialize tracking sets
     rows = new bool*[dim];
     cols = new bool*[dim];
-    divs = new bool**[dim / 3];
+    divs = new bool**[subWidth];
     for (int i = 0; i < dim; i++) {
         rows[i] = new bool[dim];
         cols[i] = new bool[dim];
@@ -32,9 +62,9 @@ Grid::Grid(int dim, ifstream& inFile, int** inBoard) {
             cols[i][j] = false;
         }
     }
-    for (int i = 0; i < dim / 3; i++) {
-        divs[i] = new bool*[dim / 3];
-        for (int j = 0; j < dim / 3; j++) {
+    for (int i = 0; i < subWidth; i++) {
+        divs[i] = new bool*[subHeight];
+        for (int j = 0; j < subHeight; j++) {
             divs[i][j] = new bool[dim];
             for (int k = 0; k < dim; k++) {
                 divs[i][j][k] = false;
@@ -48,14 +78,14 @@ Grid::Grid(int dim, ifstream& inFile, int** inBoard) {
         board[i] = new Box*[dim];
 
         for (int j = 0; j < dim; j++) {
-            if (inBoard[i][j] == 0) {
+            if (inBoard[i][j] == -1) {
                 board[i][j] = new Box(dim);
             } else {
                 if (valid(i, j, inBoard[i][j])) {
                     board[i][j] = new Box(dim, inBoard[i][j]);
                     track(i, j, inBoard[i][j]);
                 } else {
-                    throw exception();
+                    throw invalid_argument("Error: the input board was not valid.");
                 }
             }
         }
@@ -68,8 +98,8 @@ Grid::Grid(int dim, ifstream& inFile, int** inBoard) {
             cols[i][j] = false;
         }
     }
-    for (int i = 0; i < dim / 3; i++) {
-        for (int j = 0; j < dim / 3; j++) {
+    for (int i = 0; i < subWidth; i++) {
+        for (int j = 0; j < subHeight; j++) {
             for (int k = 0; k < dim; k++) {
                 divs[i][j][k] = false;
             }
@@ -81,20 +111,20 @@ bool Grid::valid(int row, int col, int num) {
     // check if already used
     if (rows[row][num - 1]) return false;
     if (cols[col][num - 1]) return false;
-    if (divs[row / 3][col / 3][num - 1]) return false;
+    if (divs[row / subHeight][col / subWidth][num - 1]) return false;
     return true;
 }
 
 void Grid::track(int row, int col, int num) {
     rows[row][num - 1] = true;
     cols[col][num - 1] = true;
-    divs[row / 3][col / 3][num - 1] = true;
+    divs[row / subHeight][col / subWidth][num - 1] = true;
 }
 
 void Grid::untrack(int row, int col, int num) {
     rows[row][num - 1] = false;
     cols[col][num - 1] = false;
-    divs[row / 3][col / 3][num - 1] = false;
+    divs[row / subHeight][col / subWidth][num - 1] = false;
 }
 
 bool Grid::solveBacktrack(int row, int col) {
@@ -143,11 +173,11 @@ void Grid::algorithmX(int** inBoard) {
         matrix[i] = new bool[dim * dim * 4];
         validRow[i] = true;
 
-        // determine if box is known
+        // determine if value is known
         int row = i / (dim * dim);
         int col = (i % (dim * dim)) / dim;
         int num = ((i % (dim * dim)) % dim) + 1;
-        if (inBoard[row][col] != 0 && inBoard[row][col] != num) {
+        if (inBoard[row][col] != -1 && inBoard[row][col] != num) {
             matrixRow(i, row, col, -1);
         } else {
             matrixRow(i, row, col, num);
@@ -164,7 +194,7 @@ void Grid::matrixRow(int index, int row, int col, int num) {
     if (num == -1) return;
 
     // cell, row, column, and subgrid constraints
-    int box = (col / 3) + (row / 3) * 3;
+    int box = (col / subWidth) + (row / subHeight) * subHeight;
     int pos[4] = { (row * dim) + col,
                    (dim * dim) + (row * dim) + (num - 1),
                    (dim * dim * 2) + (col * dim) + (num - 1),
@@ -224,20 +254,23 @@ bool Grid::solveAlgorithmX() {
 }
 
 string Grid::toString() {
+    char hex[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     string out = "";
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
             int val = board[i][j]->getValue();
-            out += val == 0 ? "." : to_string(val);
+            out += (val == -1) ? '.' : hex[val];
             if (j != dim - 1) out += " ";
-            if ((j + 1) % 3 == 0 && j + 1 != dim) out += "| ";
+            else break;
+            if ((j + 1) % subWidth == 0) out += "| ";
         }
         if (i != dim - 1) out += "\n";
-        if ((i + 1) % 3 == 0 && i + 1 != dim) {
+        if ((i + 1) % subHeight == 0 && i + 1 != dim) {
             for (int j = 0; j < dim; j++) {
-            out += "-";
-            if (j != dim - 1) out += "-";
-            if ((j + 1) % 3 == 0 && j + 1 != dim) out += "+-";
+                out += '-';
+                if (j != dim - 1) out += "-";
+                else break;
+                if ((j + 1) % subWidth == 0) out += "+-";
             }
             out += "\n";
         }
@@ -253,8 +286,8 @@ Grid::~Grid() {
     }
     delete[] rows;
     delete[] cols;
-    for (int i = 0; i < dim / 3; i++) {
-        for (int j = 0; j < dim / 3; j++) {
+    for (int i = 0; i < subWidth; i++) {
+        for (int j = 0; j < subHeight; j++) {
             delete[] divs[i][j];
         }
         delete[] divs[i];
@@ -274,6 +307,7 @@ Grid::~Grid() {
 void Grid::destructAlgorithmX() {
     // destruct candidate arrays
     delete[] validRow;
+    delete[] validCol;
     delete[] cand;
 
     // destruct matrix

@@ -5,26 +5,20 @@
 #include "Box.h"
 
 int main(int argc, char* argv[]) {
-    // initialize variables
-    const int dim = 9;
-    ifstream inFile(argv[1]);
-    if (!inFile.is_open()) throw runtime_error("\nError: could not open file.\n");
-    int** inBoard = new int*[dim];
-    for (int i = 0; i < dim; i++) inBoard[i] = new int[dim];
-
     // initialize game board
+    ifstream inFile(argv[1]);
+    if (!inFile.is_open()) {
+        cout << "\nError: could not open file." << endl;
+        return 1;
+    }
     Grid* grid;
+    int** inBoard = NULL;
+    int dim = 0;
     try {
-        grid = new Grid(dim, inFile, inBoard);
+        grid = new Grid(inFile, inBoard, dim);
         grid->algorithmX(inBoard);
     } catch (invalid_argument const &e) {
-        cout << "\nError: some input in the board was invalid.\n";
-        return 1;
-    } catch (out_of_range const &e) {
-        cout << "\nError: inputs must be between 1 and " << dim << ", inclusive.\n";
-        return 1;
-    } catch (exception const &e) {
-        cout << "\nError: the input board is not valid.\n";
+        cout << endl << e.what() << endl;
         return 1;
     }
     inFile.close();
@@ -39,10 +33,20 @@ int main(int argc, char* argv[]) {
     cout << "\nSolving this board:\n\n" << grid->toString() << "\n\nWorking..." << endl;
     if (grid->solveAlgorithmX()) {
         chrono::steady_clock::time_point end = chrono::steady_clock::now();
-        cout << "Board has been solved in " << (chrono::duration_cast<chrono::milliseconds>(end - begin).count() / 1000.0);
-        cout << " seconds:\n\n" << grid->toString() << "\n";
+        auto duration = (chrono::duration_cast<chrono::milliseconds>(end - begin).count() / 1000.0);
+        double seconds = static_cast<double>(duration);
+        if (seconds < 60) {
+            cout << "Board has been solved in " << seconds << " seconds:\n\n" << grid->toString() << endl;
+        } else  {
+            int minutes = seconds / 60;
+            if (minutes == 1) {
+                cout << "Board has been solved in 1 minute and " << seconds << " seconds:\n\n" << grid->toString() << endl;
+            } else {
+                cout << "Board has been solved in " << minutes << " minutes and " << seconds << " seconds:\n\n" << grid->toString() << endl;
+            }
+        }
     } else {
-        cout << "\nThe board could not be solved.\n";
+        cout << "\nThe board could not be solved." << endl;
     }
     grid->destructAlgorithmX();
     delete grid;

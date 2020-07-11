@@ -1,7 +1,7 @@
 #include "Box.h"
 
 Box::Box(int dim) {
-    value = 0;
+    value = -1;
     for (int i = 1; i <= dim; i++) choices.insert(i);
 }
 

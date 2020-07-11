@@ -13,6 +13,8 @@ using namespace std;
 class Grid {
     private:
         int dim;
+        int subHeight;
+        int subWidth;
         bool** rows;
         bool** cols;
         bool*** divs;
@@ -26,7 +28,7 @@ class Grid {
 
     public:
         // basic constructor for the Grid
-        Grid(int dim, ifstream& inFile, int** inBoard);
+        Grid(ifstream& inFile, int**& inBoard, int& dim);
         
         // determine if a number is valid in a position
         bool valid(int row, int col, int num);
