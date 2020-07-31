@@ -39,11 +39,9 @@ int main(int argc, char* argv[]) {
             cout << "Board has been solved in " << seconds << " seconds:\n\n" << grid->toString() << endl;
         } else  {
             int minutes = seconds / 60;
-            if (minutes == 1) {
-                cout << "Board has been solved in 1 minute and " << seconds << " seconds:\n\n" << grid->toString() << endl;
-            } else {
-                cout << "Board has been solved in " << minutes << " minutes and " << seconds << " seconds:\n\n" << grid->toString() << endl;
-            }
+            seconds = seconds - (minutes * 60);
+            cout << "Board has been solved in " << minutes << " minute" << (minutes == 1 ? "" : "s") <<
+                " and " << seconds << " seconds:\n\n" << grid->toString() << endl;
         }
     } else {
         cout << "\nThe board could not be solved." << endl;
