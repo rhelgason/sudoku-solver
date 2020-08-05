@@ -44,6 +44,7 @@ Grid::Grid(ifstream& inFile, int**& inBoard, int& dim) {
                 } else {
                     if (temp > dim || temp < 1) throw invalid_argument("Error: inputs must be between 1 and " + to_string(dim) + ", inclusive.");
                 }
+                if (temp == 0) temp = 16;
                 inBoard[i][j] = temp;
             }
         }
@@ -85,7 +86,7 @@ Grid::Grid(ifstream& inFile, int**& inBoard, int& dim) {
                     board[i][j] = new Box(dim, inBoard[i][j]);
                     track(i, j, inBoard[i][j]);
                 } else {
-                    throw invalid_argument("Error: the input board was not valid.");
+                    throw invalid_argument("Error: the input board was not valid at row " + to_string(i) + " and column " + to_string(j) + ".");
                 }
             }
         }
@@ -253,13 +254,31 @@ bool Grid::solveAlgorithmX() {
     return false;
 }
 
+void Grid::dancingLinks(int** inBoard) {
+    // initialize header row
+    head = new Node();
+    Node* curr = head;
+    for (int i = 0; i < (dim * dim * 4); i++) {
+        curr->setRight(new Node(curr, head));
+        curr = curr->getRight();
+        head->setLeft(curr);
+    }
+
+    // initialize matrix
+    curr = head->getRight();
+}
+
+Node* Grid::linksRow(int row, int col, int num) {
+    return NULL;
+}
+
 string Grid::toString() {
-    char hex[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    char hex[16] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', '0'};
     string out = "";
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
             int val = board[i][j]->getValue();
-            out += (val == -1) ? '.' : hex[val];
+            out += (val == -1) ? '.' : hex[val - 1];
             if (j != dim - 1) out += " ";
             else break;
             if ((j + 1) % subWidth == 0) out += "| ";
