@@ -12,6 +12,16 @@ Node::Node(Node* l, Node *r) {
     cand = 0;
 }
 
+Node::Node(Node* l, Node* r, Node* u, Node* d, Node* c, int row) {
+    left = l;
+    right = r;
+    up = u;
+    down = d;
+    colHead = c;
+    c->addCand();
+    this->row = row;
+}
+
 void Node::setRight(Node * n) {
     right = n;
 }
@@ -42,4 +52,62 @@ Node* Node::getUp() {
 
 Node* Node::getDown() {
     return down;
+}
+
+Node* Node::getColHead() {
+    return colHead;
+}
+
+void Node::addCand() {
+    cand++;
+}
+
+void Node::removeCand() {
+    cand--;
+}
+
+int Node::getCand() {
+    return cand;
+}
+
+int Node::getRow() {
+    return row;
+}
+
+void Node::cover() {
+    // cover header node
+    left->setRight(right);
+    right->setLeft(left);
+
+    // cover related nodes in matrix
+    Node* colCurr = down;
+    while (colCurr != this) {
+        Node* rowCurr = colCurr->getRight();
+        while (rowCurr != colCurr) {
+            rowCurr->getUp()->setDown(rowCurr->getDown());
+            rowCurr->getDown()->setUp(rowCurr->getUp());
+            rowCurr->getColHead()->removeCand();
+            rowCurr = rowCurr->getRight();
+        }
+        colCurr = colCurr->getDown();
+    }
+}
+
+void Node::uncover() {
+    // uncover related nodes in matrix
+    Node* colCurr = up;
+    while (colCurr != this) {
+        Node* rowCurr = colCurr->getLeft();
+        while (rowCurr != colCurr) {
+            rowCurr->getUp()->setDown(rowCurr);
+            rowCurr->getDown()->setUp(rowCurr);
+            rowCurr->getColHead()->addCand();
+            rowCurr = rowCurr->getLeft();
+        }
+        colCurr = colCurr->getUp();
+    }
+
+    // uncover header node
+    left->setRight(this);
+    right->setLeft(this);
 }

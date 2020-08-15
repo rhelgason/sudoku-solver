@@ -12,6 +12,7 @@ class Node {
         struct Node* down;
         struct Node* colHead;
         int cand = -1;
+        int row = -1;
     
     public:
         // basic constructor for matrix head
@@ -19,6 +20,9 @@ class Node {
 
         // constructor for column headers
         Node(Node* l, Node *r);
+
+        // constructor for matrix entry
+        Node(Node* l, Node* r, Node* u, Node* d, Node* c, int row);
 
         // setters for each pointer
         void setRight(Node* n);
@@ -31,6 +35,19 @@ class Node {
         Node* getLeft();
         Node* getUp();
         Node* getDown();
+        Node* getColHead();
+
+        // candidate count functions
+        void addCand();
+        void removeCand();
+        int getCand();
+
+        // get the matrix column
+        int getRow();
+
+        // cover and uncover functions for column headers
+        void cover();
+        void uncover();
 };
 
 #endif

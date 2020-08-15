@@ -256,20 +256,118 @@ bool Grid::solveAlgorithmX() {
 
 void Grid::dancingLinks(int** inBoard) {
     // initialize header row
+    colHeads = new Node*[dim * dim * 4];
     head = new Node();
     Node* curr = head;
     for (int i = 0; i < (dim * dim * 4); i++) {
         curr->setRight(new Node(curr, head));
         curr = curr->getRight();
         head->setLeft(curr);
+        colHeads[i] = curr;
     }
 
     // initialize matrix
     curr = head->getRight();
+    for (int i = 0; i < (dim * dim * dim); i++) {
+        // determine if value is known
+        int row = i / (dim * dim);
+        int col = (i % (dim * dim)) / dim;
+        int num = ((i % (dim * dim)) % dim) + 1;
+        if (inBoard[row][col] == -1 || inBoard[row][col] == num) {
+            linksRow(row, col, num, i);
+        }
+    }
 }
 
-Node* Grid::linksRow(int row, int col, int num) {
-    return NULL;
+void Grid::linksRow(int row, int col, int num, int r) {
+    // cell constraint
+    int val = (row * dim) + col;
+    Node* colHead = colHeads[val];
+    colHead->setUp(new Node(NULL, NULL, colHead->getUp(), colHead, colHead, r));
+    Node* curr = colHead->getUp();
+    curr->getUp()->setDown(curr);
+    Node* first = curr;
+
+    // row constraint
+    val = (dim * dim) + (row * dim) + (num - 1);
+    colHead = colHeads[val];
+    colHead->setUp(new Node(curr, NULL, colHead->getUp(), colHead, colHead, r));
+    curr = colHead->getUp();
+    curr->getLeft()->setRight(curr);
+    curr->getUp()->setDown(curr);
+
+    // column constraint
+    val = (dim * dim * 2) + (col * dim) + (num - 1);
+    colHead = colHeads[val];
+    colHead->setUp(new Node(curr, NULL, colHead->getUp(), colHead, colHead, r));
+    curr = colHead->getUp();
+    curr->getLeft()->setRight(curr);
+    curr->getUp()->setDown(curr);
+
+    // subgrid constraint
+    int box = (col / subWidth) + (row / subHeight) * subHeight;
+    val = (dim * dim * 3) + (box * dim) + (num - 1);
+    colHead = colHeads[val];
+    colHead->setUp(new Node(curr, first, colHead->getUp(), colHead, colHead, r));
+    curr = colHead->getUp();
+    curr->getLeft()->setRight(curr);
+    curr->getUp()->setDown(curr);
+    first->setLeft(curr);
+}
+
+bool Grid::solveDancingLinks() {
+    // check for solution
+    if (head->getRight() == head) return true;
+
+    // deterministically select column
+    Node* low = head->getRight();
+    Node* curr = low->getRight();
+    while (curr != head) {
+        if (curr->getCand() < low->getCand()) low = curr;
+        curr = curr->getRight();
+    }
+    low->cover();
+
+    // nondeterministically try rows
+    curr = low->getDown();
+    while (curr != low) {
+        // cover columns for partial solution
+        Node* rowCurr = curr->getRight();
+        while (rowCurr != curr) {
+            rowCurr->getColHead()->cover();
+            rowCurr = rowCurr->getRight();
+        }
+
+        if (solveDancingLinks()) {
+            // uncover for destruction
+            rowCurr = curr->getLeft();
+            while (rowCurr != curr) {
+                rowCurr->getColHead()->uncover();
+                rowCurr = rowCurr->getLeft();
+            }
+
+            // add valid solution to grid
+            int r = curr->getRow();
+            int row = r / (dim * dim);
+            int col = (r % (dim * dim)) / dim;
+            int num = ((r % (dim * dim)) % dim) + 1;
+            board[row][col]->setValue(num);
+            return true;
+        } else {
+            // uncover and continue search
+            rowCurr = curr->getLeft();
+            while (rowCurr != curr) {
+                rowCurr->getColHead()->uncover();
+                rowCurr = rowCurr->getLeft();
+            }
+        }
+
+        curr = curr->getDown();
+    }
+
+    // no solution was found
+    low->uncover();
+    return false;
 }
 
 string Grid::toString() {
@@ -334,4 +432,25 @@ void Grid::destructAlgorithmX() {
         delete[] matrix[i];
     }
     delete[] matrix;
+}
+
+void Grid::destructDancingLinks() {
+    // destruct matrix
+    Node* curr = head->getRight();
+    while (curr != head) {
+        Node* currMat = curr->getDown();
+        while (currMat != curr) {
+            currMat = currMat->getDown();
+            delete currMat->getUp();
+        }
+        curr = curr->getRight();
+    }
+
+    // destruct column headers
+    curr = head->getRight();
+    while (curr != head) {
+        curr = curr->getRight();
+        delete curr->getLeft();
+    }
+    delete head;
 }

@@ -29,6 +29,7 @@ class Grid {
 
         // dancing links data structures
         Node* head;
+        Node** colHeads;
 
     public:
         // basic constructor for the Grid
@@ -59,7 +60,10 @@ class Grid {
         void dancingLinks(int** inBoard);
 
         // add a row to the dancing links matrix
-        Node* linksRow(int row, int col, int num);
+        void linksRow(int row, int col, int num, int r);
+
+        // recursive function for solving with dancing links
+        bool solveDancingLinks();
 
         // returns a string version of the Grid for output
         string toString();
@@ -69,6 +73,9 @@ class Grid {
 
         // destructor helper for algorithm x
         void destructAlgorithmX();
+
+        // destructor helper for dancing links
+        void destructDancingLinks();
 };
 
 #endif
