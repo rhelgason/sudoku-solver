@@ -99,9 +99,9 @@ void Node::uncover() {
     while (colCurr != this) {
         Node* rowCurr = colCurr->getLeft();
         while (rowCurr != colCurr) {
+            rowCurr->getColHead()->addCand();
             rowCurr->getUp()->setDown(rowCurr);
             rowCurr->getDown()->setUp(rowCurr);
-            rowCurr->getColHead()->addCand();
             rowCurr = rowCurr->getLeft();
         }
         colCurr = colCurr->getUp();

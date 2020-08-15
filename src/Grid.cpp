@@ -211,7 +211,7 @@ bool Grid::solveAlgorithmX() {
     int low = -1;
     for (int i = 0; i < (dim * dim * 4); i++) {
         if (!validCol[i]) continue;
-        if (cand[i] < cand[low] || low == -1) low = i;
+        if (low == -1 || cand[i] < cand[low]) low = i;
     }
     if (low == -1) return true;
 
@@ -345,6 +345,7 @@ bool Grid::solveDancingLinks() {
                 rowCurr->getColHead()->uncover();
                 rowCurr = rowCurr->getLeft();
             }
+            low->uncover();
 
             // add valid solution to grid
             int r = curr->getRow();
@@ -452,5 +453,6 @@ void Grid::destructDancingLinks() {
         curr = curr->getRight();
         delete curr->getLeft();
     }
+    delete[] colHeads;
     delete head;
 }
