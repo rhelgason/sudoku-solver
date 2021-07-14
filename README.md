@@ -17,7 +17,7 @@ This file should next contain the unsolved Sudoku board for the program to compl
 
 It is not necessary that subgrids are divided with extra space as shown above, but it is helpful to view the board this way. Within the `example-boards/` directory, unsolved boards of a variety of sizes have been provided for testing purposes. Blank boards have also been provided for ease of creating your own unsolved boards. For proof of concept, some extra Sudoku puzzles with no possible solution have been included. To use any board with the program, simply move the desired file to the top directory and rename it to `board.txt`.
 
-Some boards will have irregular shapes. This can be treated the same way during the creation process, so long as the above rules have been followed. Note that when the dimension rises about 9, boards will use hexadecimal digits to maintain a better visual format. Numbers 10 through 15 can instead be replaced by the characters A through F, in that order. If the board is of size 16, then a 0 can be used to represent the 16th number. An irregular board of size 10 has been included below for reference:
+Some boards will have irregular shapes. This can be treated the same way during the creation process, so long as the above rules have been followed. Note that when the dimension rises above 9, boards will use hexadecimal digits to maintain a better visual format. Numbers 10 through 15 can instead be replaced by the characters A through F, in that order. If the board is of size 16, then a 0 can be used to represent the 16th number. An irregular board of size 10 has been included below for reference:
 
 <p align="center">
   <img src="https://github.com/rhelgason/sudoku-solver/blob/master/img/board-example-10.PNG" alt="example board size 10"/>
