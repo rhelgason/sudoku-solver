@@ -13,7 +13,7 @@ This file should next contain the unsolved Sudoku board for the program to compl
 
 <p align="center">
   <img src="https://github.com/rhelgason/sudoku-solver/blob/master/img/board-example.PNG" alt="example board"/>
-<p>
+</p>
 
 It is not necessary that subgrids are divided with extra space as shown above, but it is helpful to view the board this way. Within the `example-boards/` directory, unsolved boards of a variety of sizes have been provided for testing purposes. Blank boards have also been provided for ease of creating your own unsolved boards. For proof of concept, some extra Sudoku puzzles with no possible solution have been included. To use any board with the program, simply move the desired file to the top directory and rename it to `board.txt`.
 
