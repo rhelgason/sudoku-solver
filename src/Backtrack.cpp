@@ -40,10 +40,10 @@ int main(int argc, char* argv[]) {
             int minutes = seconds / 60;
             seconds = seconds - (minutes * 60);
             cout << "Board has been solved in " << minutes << " minute" << (minutes == 1 ? "" : "s") <<
-                " and " << seconds << " seconds:\n\n" << grid->toString() << endl;
+                " and " << seconds << " seconds:\n\n" << grid->toString() << endl << endl;
         }
     } else {
-        cout << "\nThe board could not be solved." << endl;
+        cout << "\nThe board could not be solved." << endl << endl;
     }
     delete grid;
     grid = NULL;

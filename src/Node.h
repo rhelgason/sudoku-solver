@@ -1,16 +1,18 @@
 #ifndef NODE_H
 #define NODE_H
 
+#include <iostream>
+
 using namespace std;
 
 // class representing an entry in the dancing links matrix
 class Node {
     private:
-        struct Node* left;
-        struct Node* right;
-        struct Node* up;
-        struct Node* down;
-        struct Node* colHead;
+        Node* left;
+        Node* right;
+        Node* up;
+        Node* down;
+        Node* colHead;
         int cand = -1;
         int row = -1;
     
